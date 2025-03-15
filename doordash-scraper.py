@@ -4,7 +4,7 @@ from undetected_playwright.async_api import async_playwright
 
 
 async def get_scrapybara_browser():
-    client = Scrapybara(api_key="enter your API key here")
+    client = Scrapybara(api_key="scrapy-5fd9ce61-42ab-4076-a2a4-3236df1173f4")
     instance = client.start_browser()
     return instance
 
@@ -57,18 +57,15 @@ async def retrieve_menu_items(instance, start_url: str) -> list[dict]:
             print(f"Warning: Could not set address: {e}")
 
         print("Scanning and processing menu items...")
-        scroll_attempts = 0
-        max_scroll_attempts = 20
         
-        while scroll_attempts < max_scroll_attempts:
+        while True:
             curr_position = await page.evaluate('window.pageYOffset')
             total_height = await page.evaluate('document.documentElement.scrollHeight')
             viewport_height = await page.evaluate('window.innerHeight')
             
-            print(f"\nScan attempt {scroll_attempts + 1}: Position {curr_position}/{total_height}")
+            print(f"\nScanning at position {curr_position}/{total_height}")
             
             items = await page.query_selector_all('div[data-anchor-id="MenuItem"]')
-            found_new = False
             
             for item in items:
                 try:
@@ -76,7 +73,6 @@ async def retrieve_menu_items(instance, start_url: str) -> list[dict]:
                     if text not in processed_texts:
                         print(f"\nFound new item: {text[:50]}...")
                         processed_texts.add(text)
-                        found_new = True
                         
                         try:
                             async with page.expect_response(
@@ -93,6 +89,7 @@ async def retrieve_menu_items(instance, start_url: str) -> list[dict]:
                             })
                             print(f"Successfully processed item {len(menu_items)}")
                             await page.keyboard.press("Escape")
+                            await asyncio.sleep(0.3)
                             
                         except Exception as e:
                             print(f"Error processing item: {e}")
@@ -101,17 +98,12 @@ async def retrieve_menu_items(instance, start_url: str) -> list[dict]:
                     print(f"Error checking item: {e}")
                     continue
             
-            if not found_new:
-                scroll_attempts += 1
-            else:
-                scroll_attempts = 0
-                
-            if curr_position + viewport_height >= total_height and scroll_attempts >= 3:
+            # If we've reached the bottom, stop scrolling
+            if curr_position + viewport_height >= total_height:
                 break
                 
-            new_position = min(curr_position + viewport_height, total_height)
-            await page.evaluate(f'window.scrollTo(0, {new_position})')
-            await asyncio.sleep(0.2)
+            await page.evaluate(f'window.scrollTo(0, {min(curr_position + viewport_height, total_height)})')
+            await asyncio.sleep(0.3)
         
         print(f"\nProcessed {len(menu_items)} menu items")
         await browser.close()
