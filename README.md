@@ -11,14 +11,14 @@ A Python script to scrape menu items from DoorDash restaurant pages using Playwr
    ```
 
 ## Usage
-
-1. Run the script:
+1. Select the restaurant you want to be scraped by changing the url.
+2. Run the script:
 
    ```bash
    python doordash-scraper.py
    ```
 
-2. The script will:
+3. The script will:
    - Navigate to the specified DoorDash restaurant page
    - Set a delivery address
    - Scan and collect all menu items
