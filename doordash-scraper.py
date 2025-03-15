@@ -15,10 +15,19 @@ async def retrieve_menu_items(instance, start_url: str) -> list[dict]:
     url: the initial url to navigate to
 
     :desc:
-    this function navigates to the url and collects detailed data for all menu items found.
+    this function navigates to {url}. then, it will collect the detailed
+    data for each menu item in the store and return it.
+
+    (hint: click a menu item, open dev tools -> network tab -> filter for
+            "https://www.doordash.com/graphql/itemPage?operation=itemPage")
+
+    one way to do this is to scroll through the page and click on each menu
+    item.
+
+    determine the most efficient way to collect this data.
 
     :returns:
-    a list of all menu items on the page, represented as dictionaries
+    a list of menu items on the page, represented as dictionaries
     """
     menu_items = []
     processed_texts = set()  
